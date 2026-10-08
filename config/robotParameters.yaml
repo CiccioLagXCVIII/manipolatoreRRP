@@ -1,0 +1,32 @@
+# BB Base
+baseWidth: 0.3             # Larghezza Base
+baseLength: 0.3            # Lunghezza Base
+baseHeight: 0.05           # Altezza Base
+worldBase: 2.0             # Distanza World Base
+
+# BB Link
+l1: 0.55                   # Lunghezza Link 1
+l2: 0.45                   # Lunghezza Link 2
+l3: 0.35                   # Lunghezza Link 3
+linkRadius: 0.035          # Raggio Link (Diametro 7cm)
+
+# BB Giunti
+# CC Pi Greco Non E Piu Necessario Definire La Proprieta Perche Gia Presente Di Default In Xacro
+# pi: 3.14159265359
+jointRadius: 0.05          # Raggio Sfere Giunti Revolute (Diametro 10cm)
+boxSize: 0.10              # Dimensione Box Giunto Prismatico (Lato 10cm)
+
+# BB End Effector
+eeBaseWidth: 0.05          # Larghezza Base Pinza 5 cm
+eeBaseLength: 0.10         # Lunghezza Totale Base Pinza 10 cm
+eeBaseHeight: 0.015        # Spessore Piastra Base Pinza 1.5cm
+eeFingerLength: 0.05       # Lunghezza Dita Pinza 5cm
+eeFingerThickness: 0.01    # Spessore Singolo Dito Pinza 1cm
+
+# BB Limiti Di Escursione Dei Giunti
+limitMinQ1: -3.14159265359  # Limite Minimo Giunto 1 (-pi rad)
+limitMaxQ1: 3.14159265359   # Limite Massimo Giunto 1 (+pi rad)
+limitMinQ2: -1.57079632679  # Limite Minimo Giunto 2 (-pi/2 rad)
+limitMaxQ2: 0.78539816339   # Limite Massimo Giunto 2 (+pi/4 rad)
+limitMinQ3: 0.0             # Limite Minimo Giunto 3 (0 m)
+limitMaxQ3: 0.35            # Limite Massimo Giunto 3 (35 cm)

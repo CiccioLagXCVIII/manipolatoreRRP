@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>manipolatoreRRP</name>
+  <version>0.0.4</version>
+  <!-- <description>Package Di manipolatoreRRP</description> -->
+  <description>Package ROS Per La Modellazione Tramite URDF, Cinematica Diretta, Inversa Di Un Manipolatore RRP</description>
+
+  <!-- AA DEFINIZIONE INFORMAZIONI DI BASE -->
+
+  <!-- BB Un Tag Di Manutentore Richiesto, Più Tag Consentiti, Una Sola Persona Per Ciascun Tag -->
+  <!-- CC Esempio: -->
+  <!-- <maintainer email="utente.esempio@esempio.com">Utente Esempio</maintainer> -->
+  <maintainer email="francesco.loverde@studenti.unipg.it">Francesco Lo Verde</maintainer>
+
+  <!-- BB Un Tag Di Licenza Richiesto, Più Tag Consentiti, Una Sola Licenza Per Ciascun Tag -->
+  <!-- CC Stringhe Di Licenza Comunemente Utilizzate: -->
+  <!-- BSD, MIT, Licenza Software Boost, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>MIT</license>
+
+  <!-- BB I Tag Di Url Sono Opzionali, Ma Più Tag Sono Consentiti, Uno Per Ciascun Tag -->
+  <!-- CC L'Attributo Opzionale Di Tipo Può Essere: Website, Bugtracker, Oppure Repository -->
+  <!-- CC Esempio: -->
+  <!-- <url type="website">http://wiki.ros.org/robot</url> -->
+
+  <!-- BB I Tag Autore Sono Opzionali, Più Tag Sono Consentiti, Uno Per Ciascun Tag -->
+  <!-- CC Gli Autori Non Devono Necessariamente Essere Manutentori, Ma Possono Esserlo -->
+  <!-- CC Esempio: -->
+  <author email="francesco.loverde@studenti.unipg.it">Francesco Lo Verde</author>
+
+  <!-- AA DEFINIZIONE DELLE DIPENDENZE -->
+
+  <!-- BB I Tag Di Dipendenza Sono Utilizzati Per Specificare Le Dipendenze Del Pacchetto -->
+  <!-- CC Le Dipendenze Possono Essere Pacchetti Catkin Oppure Dipendenze Di Sistema -->
+  <!-- CC Esempi: -->
+  <!-- CC Utilizzare Il Tag Depend Come Scorciatoia Per Pacchetti Che Sono Sia Dipendenze Di Compilazione Che Di Esecuzione -->
+  <!-- <depend>roscpp</depend> -->
+  <!-- CC Si Noti Che Questo È Equivalente A Quanto Segue: -->
+  <!-- <build_depend>roscpp</build_depend> -->
+  <!-- <exec_depend>roscpp</exec_depend> -->
+  <!-- CC Utilizzare build_depend Per Pacchetti Necessari Al Momento Della Compilazione: -->
+  <!-- <build_depend>message_generation</build_depend> -->
+  <!-- CC Utilizzare build_export_depend Per Pacchetti Necessari Al Fine Di Compilare Rispetto A Questo Pacchetto: -->
+  <!-- <build_export_depend>message_generation</build_export_depend> -->
+  <!-- CC Utilizzare buildtool_depend Per Pacchetti Di Strumenti Di Compilazione: -->
+  <!-- <buildtool_depend>catkin</buildtool_depend> -->
+  <!-- CC Utilizzare exec_depend Per Pacchetti Necessari Durante Il Tempo Di Esecuzione: -->
+  <!-- <exec_depend>message_runtime</exec_depend> -->
+  <!-- CC Utilizzare test_depend Per Pacchetti Necessari Solo Al Fine Di Eseguire I Test: -->
+  <!-- <test_depend>gtest</test_depend> -->
+  <!-- CC Utilizzare doc_depend Per Pacchetti Necessari Solo Al Fine Di Compilare La Documentazione: -->
+  <!-- <doc_depend>doxygen</doc_depend> -->
+
+  <!-- BB Dipendenze Di Compilazione Del Sistema -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- BB Dipendenze Condivise Sia In Fase Di Compilazione Che Di Esecuzione -->
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf</depend>
+  <depend>tf2_ros</depend>
+
+  <!-- BB Dipendenze Richieste Esclusivamente Durante Il Tempo Di Esecuzione -->
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz</exec_depend>
+
+  <!-- Dipendenze Di Python -->
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-matplotlib</exec_depend>
+  <exec_depend>python3-sympy</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>python3-rospkg</exec_depend>
+
+  <!-- AA ESPORTAZIONE DI ALTRI STRUMENTI -->
+
+  <!-- BB Il Tag Di Esportazione Contiene Altri Tag Non Specificati -->
+  <export>
+    <!-- CC Altri Strumenti Possono Richiedere Di Inserire Qui Informazioni Aggiuntive -->
+  </export>
+</package>

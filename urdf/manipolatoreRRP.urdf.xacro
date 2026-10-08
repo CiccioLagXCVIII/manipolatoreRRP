@@ -1,0 +1,245 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+
+    <!-- AA DEFINIZIONI VARIABILI -->
+    <!-- BB Definizione Percorso E Parsing Del File Config -->
+    <xacro:property name="configPath" value="$(find manipolatoreRRP)/config/robotParameters.yaml" />
+    <xacro:property name="robotParams" value="${xacro.load_yaml(configPath)}" />
+
+    <!-- BB Base -->
+    <xacro:property name="baseWidth" value="${robotParams['baseWidth']}" />
+    <!-- Larghezza Base -->
+    <xacro:property name="baseLength" value="${robotParams['baseLength']}" />
+    <!-- Lunghezza Base -->
+    <xacro:property name="baseHeight" value="${robotParams['baseHeight']}" />
+    <!-- Altezza Base   -->
+    <xacro:property name="worldBase" value="${robotParams['worldBase']}" />
+    <!-- Distanza World Base -->
+
+    <!-- BB Link -->
+    <xacro:property name="l1" value="${robotParams['l1']}" />
+    <!-- Lunghezza Link 1 -->
+    <xacro:property name="l2" value="${robotParams['l2']}" />
+    <!-- Lunghezza Link 2 -->
+    <xacro:property name="l3" value="${robotParams['l3']}" />
+    <!-- Lunghezza Link 3 -->
+    <xacro:property name="linkRadius" value="${robotParams['linkRadius']}"/>
+    <!-- Raggio Link (Diametro 7cm) -->
+
+    <!-- BB Giunti -->
+    <!-- CC Non E Piu Necessario Definire La Proprieta Perche Gia Presente Di Default In Xacro -->
+    <xacro:property name="jointRadius" value="${robotParams['jointRadius']}" />
+    <!-- Raggio Sfere Giunti Revolute (Diametro 10cm) -->
+    <xacro:property name="boxSize" value="${robotParams['boxSize']}" />
+    <!-- Dimensione Box Giunto Prismatico (Lato 10cm) -->
+
+    <!-- BB End Effector -->
+    <xacro:property name="eeBaseWidth" value="${robotParams['eeBaseWidth']}" />
+    <!-- Larghezza Base Pinza 5 cm -->
+    <xacro:property name="eeBaseLength" value="${robotParams['eeBaseLength']}" />
+    <!-- Lunghezza Totale Base Pinza 10 cm -->
+    <xacro:property name="eeBaseHeight" value="${robotParams['eeBaseHeight']}" />
+    <!-- Spessore Piastra Base Pinza 1.5cm -->
+    <xacro:property name="eeFingerLength" value="${robotParams['eeFingerLength']}" />
+    <!-- Lunghezza Dita Pinza 5cm -->
+    <xacro:property name="eeFingerThickness" value="${robotParams['eeFingerThickness']}" />
+    <!-- Spessore Singolo Dito Pinza 1cm -->
+
+    <!-- BB Limiti Dei Giunti -->
+    <xacro:property name="limitMinQ1" value="${robotParams['limitMinQ1']}" />
+    <xacro:property name="limitMaxQ1" value="${robotParams['limitMaxQ1']}" />
+    <xacro:property name="limitMinQ2" value="${robotParams['limitMinQ2']}" />
+    <xacro:property name="limitMaxQ2" value="${robotParams['limitMaxQ2']}" />
+    <xacro:property name="limitMinQ3" value="${robotParams['limitMinQ3']}" />
+    <xacro:property name="limitMaxQ3" value="${robotParams['limitMaxQ3']}" />
+
+    <!-- AA DEFINIZIONI COLORI -->
+
+    <xacro:macro name="colorDef">
+        <material name="baseColor">
+            <color rgba="0.22 0.24 0.26 1"/>
+        </material>
+        <material name="linkColor">
+            <color rgba="0.65 0.65 0.65 1"/>
+        </material>
+        <material name="jointColor">
+            <color rgba="0.95 0.72 0.08 0.75"/>
+        </material>
+        <material name="endEffectorColor">
+            <color rgba="0.8 0.12 0.12 1"/>
+        </material>
+    </xacro:macro>
+
+    <!-- AA DEFINIZIONI BRACCIO -->
+    <xacro:macro name="robotArmGenerator">
+        <!-- AA Link Fisso World -->
+        <link name="world"/>
+
+        <!-- AA Base Del Manipolatore -->
+        <!-- BB Giunto Fisso Base Manipolatore -->
+        <joint name="giuntoWorld" type="fixed">
+            <parent link="world"/>
+            <child link="base"/>
+            <origin xyz="${worldBase} 0 0" rpy="0 0 0"/>
+        </joint>
+
+        <!-- BB Link Base Manipolatore -->
+        <link name="base">
+            <visual>
+                <!-- DD Traslazione Di Metà Altezza Lungo Z Per Poggiare Il Solido Esattamente Sopra La Griglia Di RViz -->
+                <origin xyz="0 0 ${baseHeight / 2}" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${baseWidth} ${baseLength} ${baseHeight}" />
+                </geometry>
+                <material name="baseColor"/>
+            </visual>
+        </link>
+
+        <!-- AA Giunto 1 -->
+        <!-- BB Giunto Rotante Attorno Asse Z -->
+        <joint name="giunto1" type="revolute">
+            <parent link="base"/>
+            <child link="RF0"/>
+            <!-- DD Posizionamento Del Giunto Esattamente Sulla Faccia Superiore Del Blocco Di Base -->
+            <origin xyz="0 0 ${baseHeight}" rpy="0 0 0"/>
+            <axis xyz="0 0 1"/>
+            <limit effort="100" velocity="1.0" lower="${limitMinQ1}" upper="${limitMaxQ1}"/>
+        </joint>
+
+        <!-- BB Sfera (Giunto) + Cilindro (Link 1) -->
+        <link name="RF0">
+            <visual>
+                <!-- DD Sfera Centrata Sull'Asse Di Rotazione E Sollevata Di Metà Raggio Per Poggiarla Sulla Base -->
+                <origin xyz="0 0 ${jointRadius}" rpy="0 0 0"/>
+                <geometry>
+                    <sphere radius="${jointRadius}"/>
+                </geometry>
+                <material name="jointColor"/>
+            </visual>
+            <visual>
+                <!-- DD Traslazione Di Metà Lunghezza Più Diametro Sfera Per Evitare Che Entri Dentro -->
+                <origin xyz="0 0 ${(l1 / 2.0) + (2 * jointRadius)}" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${linkRadius}" length="${l1}" />
+                </geometry>
+                <material name="linkColor"/>
+            </visual>
+        </link>
+
+        <!-- AA Giunto 2 -->
+        <!-- BB Giunto Rotante Attorno Asse Y -->
+        <joint name="giunto2" type="revolute">
+            <parent link="RF0"/>
+            <child link="RF1"/>
+            <!-- DD Posizionamento In Cima Al Primo Link -->
+            <!-- DD Diametro Sfera Giunto 1 + Lunghezza Link 1 + Raggio Sfera Giunto 2 -->
+            <origin xyz="0 0 ${2*jointRadius + l1 + jointRadius}" rpy="0 0 0"/>
+            <axis xyz="0 1 0"/>
+            <!-- DD Movimento Da -90 gradi a +45 gradi Per Evitare Collisioni -->
+            <!-- DD Non Va Oltre La Verticale Per Evitare Ridondanza Perche Si Può Raggiungere Lo Stesso Punto Andando A Usare Anche Il Giunto 1 -->
+            <limit effort="100" velocity="1.0" lower="${limitMinQ2}" upper="${limitMaxQ2}"/>
+        </joint>
+
+        <!-- BB Sfera (Giunto) + Cilindro (Link 2) -->
+        <link name="RF1">
+            <visual>
+                <!-- DD Sfera Centrata Perfettamente Sull'Origine Del Secondo Giunto Rotante -->
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <sphere radius="${jointRadius}"/>
+                </geometry>
+                <material name="jointColor"/>
+            </visual>
+            <visual>
+                <!-- DD Spostamento Di Metà Braccio Più Raggio Sfera Lungo X Per Allinearlo Al Giunto Precedente E Rotazione Di 90° Per Renderlo Orizzontale -->
+                <origin xyz="${(l2/2) + jointRadius} 0 0" rpy="0 ${pi/2} 0"/>
+                <geometry>
+                    <cylinder radius="${linkRadius}" length="${l2}" />
+                </geometry>
+                <material name="linkColor"/>
+            </visual>
+            <visual>
+                <!-- DD Posizionamento Della Guida Del Prismatico All'Estremità Del Secondo Braccio (Lunghezza L2 Più Diametro Sfera) -->
+                <origin xyz="${jointRadius + l2 + (boxSize/2)} 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${boxSize} ${boxSize} ${boxSize}"/>
+                </geometry>
+                <material name="jointColor"/>
+            </visual>
+        </link>
+
+        <!-- AA Giunto 3 -->
+        <!-- BB Giunto Prismatico Lungo Asse Z -->
+        <joint name="giunto3" type="prismatic">
+            <parent link="RF1"/>
+            <child link="RF2"/>
+            <!-- DD Posizionamento Sull'Asse Della Guida All'Estremità Del Secondo Braccio (Raggio Sfera + Lunghezza L2 + Metà Dimensione Box) -->
+            <origin xyz="${jointRadius + l2 + (boxSize/2)} 0 0" rpy="0 0 0"/>
+            <axis xyz="0 0 1"/>
+            <limit effort="100" velocity="1.0" lower="${limitMinQ3}" upper="${limitMaxQ3}"/>
+        </joint>
+
+        <!-- BB Cilindro Di Scorrimento (Link 3) -->
+        <link name="RF2">
+            <visual>
+                <!-- DD Link Centrato Nell'Origine Del Box Orientato Verticalmente Per Scorrere Lungo Z -->
+                <!-- DD Spostato Di Metà Lunghezza Lato Box + Meta Lunghezza Link -->
+                <origin xyz="0 0 -${(l3/2) + (boxSize/2)}" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${linkRadius}" length="${l3}" />
+                </geometry>
+                <material name="linkColor"/>
+            </visual>
+        </link>
+
+        <!-- AA End Effector -->
+        <!-- BB Giunto Fisso End Effector -->
+        <joint name="giuntoEE" type="fixed">
+            <parent link="RF2"/>
+            <child link="endEffector"/>
+            <!-- DD Ruotato Verso Il Basso Di 180° -->
+            <!-- DD Spostato In Basso Di Metà Lunghezza Lato Box + Lunghezza Del Link -->
+            <origin xyz="0 0 ${-(boxSize/2 + l3)}" rpy="${pi} 0 0"/>
+        </joint>
+
+        <!-- BB Link End Effector (Pinza) -->
+        <link name="endEffector">
+            <!-- CC Piastra Di Base Della Pinza Allineata Sull'Asse Z Locale -->
+            <visual>
+                <!-- DD Centrato Rispetto Al Giunto E Spostato In Basso Di Metà Spessore -->
+                <origin xyz="0 0 ${eeBaseHeight / 2}" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${eeBaseWidth} ${eeBaseLength} ${eeBaseHeight}"/>
+                </geometry>
+                <material name="endEffectorColor"/>
+            </visual>
+
+            <!-- CC Dito Destro Della Pinza Posizionato Sull'Estremità Dell'Asse Y -->
+            <visual>
+                <!-- DD Spostato In Basso Lungo Z E Allineato Al Bordo Esterno Destro -->
+                <origin xyz="0 ${(eeBaseLength / 2) - (eeFingerThickness / 2)} ${eeBaseHeight + (eeFingerLength / 2)}" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${eeBaseWidth} ${eeFingerThickness} ${eeFingerLength}"/>
+                </geometry>
+                <material name="endEffectorColor"/>
+            </visual>
+
+            <!-- CC Dito Sinistro Della Pinza Posizionato Sull'Estremità Opposta Dell'Asse Y -->
+            <visual>
+                <!-- DD Spostato In Basso Lungo Z E Allineato Al Bordo Esterno Sinistro -->
+                <origin xyz="0 ${-(eeBaseLength / 2) + (eeFingerThickness / 2)} ${eeBaseHeight + (eeFingerLength / 2)}" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${eeBaseWidth} ${eeFingerThickness} ${eeFingerLength}"/>
+                </geometry>
+                <material name="endEffectorColor"/>
+            </visual>
+        </link>
+
+    </xacro:macro>
+
+    <!-- AA Chiamata Alle Macro -->
+    <xacro:colorDef />
+    <xacro:robotArmGenerator />
+
+</robot>

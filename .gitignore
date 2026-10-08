@@ -1,0 +1,28 @@
+# Python: (File Compilati E Cache)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Cartella E File Esclusi Dal Repository
+scriptAusiliari/
+analize.md
+appunti.md
+contesto.md
+daFare.md
+testManipolatore.py
+
+# File Generati Da ROS
+frames.gv
+frames.pdf
+*.log
+
+# File Di Configurazione Di VsCode
+.vscode/
+.idea/
+*.swp
+*~
+
+# File Di Windows
+.DS_Store
+Thumbs.db
