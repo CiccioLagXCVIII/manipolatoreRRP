@@ -47,17 +47,16 @@ try:
             rotation = dataTF.transform.rotation
 
             # BB Stampa Dati Grezzi
-            print(f"\n{COLOR_TITOLO}-----------------------------------------------------{COLOR_RESET}")
+            print()
+            print(f"{COLOR_TITOLO}[tfPrinter] -----------------------------------------------------{COLOR_RESET}")
 
             print(f"{COLOR_TITOLO}[tfPrinter] Trasformazione Da '{SOURCE_FRAME}' A '{TARGET_FRAME}':{COLOR_RESET}")
 
-            print(f"[tfPrinter] Timestamp: {dataTF.header.stamp.to_sec():.4f}")
+            print(f"{COLOR_TITOLO}[tfPrinter] Timestamp:{COLOR_RESET} {dataTF.header.stamp.to_sec():.4f}")
 
-            print(f"\n{COLOR_RISULTATO}[tfPrinter] Traslazione (Posizione X, Y, Z):{COLOR_RESET}")
-            print(f"[ {translation.x:.4f}, {translation.y:.4f}, {translation.z:.4f} ]")
+            print(f"{COLOR_RISULTATO}[tfPrinter] Posizione End Effector (Traslazione X, Y, Z):{COLOR_RESET} [ {translation.x:.4f}, {translation.y:.4f}, {translation.z:.4f} ]")
 
-            print(f"\n{COLOR_RISULTATO}[tfPrinter] Quaternione (Orientamento X, Y, Z, W):{COLOR_RESET}")
-            print(f"[ {rotation.x:.4f}, {rotation.y:.4f}, {rotation.z:.4f}, {rotation.w:.4f} ]")
+            print(f"{COLOR_RISULTATO}[tfPrinter] [tfPrinter] Quaternione (Orientamento X, Y, Z, W):{COLOR_RESET} [ {rotation.x:.4f}, {rotation.y:.4f}, {rotation.z:.4f}, {rotation.w:.4f} ]")
 
             # BB Calcolo Della Matrice Di Trasformazione Omogenea
             transformationMatrix = kinematicsUtils.getTransformationMatrix(translation, rotation)

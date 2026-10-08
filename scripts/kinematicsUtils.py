@@ -101,7 +101,7 @@ def loadRobotParameters(forceReload=False):
             loadedFromROS = True
         except (KeyError, rospy.ROSException):
             loadedFromROS = False
-            rospy.logwarn(" [kinematicsUtils] Parametri Non Trovati Nel Server ROS, Caricamento Dal File YAML Di Configurazione...")
+            rospy.logwarn("[kinematicsUtils] Parametri Non Trovati Nel Server ROS, Caricamento Dal File YAML Di Configurazione...")
 
     # CC Se ROS Non Riesce A Raggiungere ROS O A Caricare I Parametri, Legge I Parametri Dal File YAML
     if not loadedFromROS:
@@ -158,7 +158,7 @@ def checkJointLimits(q1, q2, q3):
     try:
         q1, q2, q3 = float(q1), float(q2), float(q3)
     except (ValueError, TypeError):
-        rospy.logwarn(" [kinematicsUtils] Valori dei giunti non numerici ricevuti in checkJointLimits")
+        rospy.logwarn("[kinematicsUtils] Valori dei giunti non numerici ricevuti in checkJointLimits")
         return False, None, None, None
 
     isValid = True
@@ -174,10 +174,10 @@ def checkJointLimits(q1, q2, q3):
         # EE Sempre Per Il Motivo Che Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q1 Il Valore Limitato Tra I Limiti Fisici Del Giunto
         q1 = float(np.clip(q1, limitMinQ1, limitMaxQ1))
     elif q1 < limitMinQ1:
-        rospy.logwarn(f" [kinematicsUtils] Valore Giunto 1 Inferiore Al Limite Minimo [{limitMinQ1:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 1 Inferiore Al Limite Minimo [{limitMinQ1:.3f}]")
         isValid = False
     else:
-        rospy.logwarn(f" [kinematicsUtils] Valore Giunto 1 Superiore Al Limite Massimo [{limitMaxQ1:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 1 Superiore Al Limite Massimo [{limitMaxQ1:.3f}]")
         isValid = False
 
     # BB Controllo Del Giunto Due
@@ -188,10 +188,10 @@ def checkJointLimits(q1, q2, q3):
         # EE Sempre Per Il Motivo Che Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q2 Il Valore Limitato Tra I Limiti Fisici Del Giunto
         q2 = float(np.clip(q2, limitMinQ2, limitMaxQ2))
     elif q2 < limitMinQ2:
-        rospy.logwarn(f" [kinematicsUtils] Valore Giunto 2 Inferiore Al Limite Minimo [{limitMinQ2:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 2 Inferiore Al Limite Minimo [{limitMinQ2:.3f}]")
         isValid = False
     else:
-        rospy.logwarn(f" [kinematicsUtils] Valore Giunto 2 Superiore Al Limite Massimo [{limitMaxQ2:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 2 Superiore Al Limite Massimo [{limitMaxQ2:.3f}]")
         isValid = False
 
     # BB Controllo Del Giunto Tre
@@ -203,10 +203,10 @@ def checkJointLimits(q1, q2, q3):
         # EE Sempre Per Il Motivo Che Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q3 Il Valore Limitato Tra I Limiti Fisici Del Giunto
         q3 = float(np.clip(q3, limitMinQ3, limitMaxQ3))
     elif q3 < limitMinQ3:
-        rospy.logwarn(f" [kinematicsUtils] Valore Giunto 3 Inferiore Al Limite Minimo [{limitMinQ3:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 3 Inferiore Al Limite Minimo [{limitMinQ3:.3f}]")
         isValid = False
     else:
-        rospy.logwarn(f" [kinematicsUtils] Valore Giunto 3 Superiore Al Limite Massimo [{limitMaxQ3:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 3 Superiore Al Limite Massimo [{limitMaxQ3:.3f}]")
         isValid = False
 
     return isValid, q1, q2, q3
@@ -332,10 +332,10 @@ def checkWorkspace(xTarget, yTarget, zTarget):
 
     # CC Verifica 1: Distanza Sferica Dal Centro Del Giunto 2 Con Margine Di Tolleranza
     if rD < (rDMin - tolerance):
-        rospy.logwarn(f" [kinematicsUtils] Target Troppo Vicino Al Giunto 2 Del Robot: Distanza {rD:.4f} < {rDMin:.4f}")
+        rospy.logwarn(f"[kinematicsUtils] Target Troppo Vicino Al Giunto 2 Del Robot: Distanza {rD:.4f} < {rDMin:.4f}")
         return False
     elif rD > (rDMax + tolerance):
-        rospy.logwarn(f" [kinematicsUtils] Target Fuori Dal Raggio Massimo: Distanza {rD:.4f} > {rDMax:.4f}")
+        rospy.logwarn(f"[kinematicsUtils] Target Fuori Dal Raggio Massimo: Distanza {rD:.4f} > {rDMax:.4f}")
         return False
 
     # CC Verifica 2: Raggio Minimo Nel Piano XY Con Tolleranza
@@ -344,7 +344,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     d3Retracted = limitMaxQ3 - (l3 + (boxSize / 2.0))
     minRadiusXY = np.abs(d3Retracted)
     if rXY < (minRadiusXY - tolerance):
-        rospy.logwarn(f" [kinematicsUtils] Target Troppo Vicino Al Link Verticale: Raggio XY {rXY:.4f} < {minRadiusXY:.4f}")
+        rospy.logwarn(f"[kinematicsUtils] Target Troppo Vicino Al Link Verticale: Raggio XY {rXY:.4f} < {minRadiusXY:.4f}")
         return False
 
     # CC Verifica 3: Limiti Di Escursione Angolare Della Base (Giunto 1)
@@ -352,7 +352,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     minQ1 = limitMinQ1 - tolerance
     maxQ1 = limitMaxQ1 + tolerance
     if not (minQ1 <= q1Target <= maxQ1):
-        rospy.logwarn(f" [kinematicsUtils] Target Non Raggiungibile: Angolo q1 ({q1Target:.4f} rad) Fuori Dai Limiti [{limitMinQ1:.3f}, {limitMaxQ1:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Target Non Raggiungibile: Angolo q1 ({q1Target:.4f} rad) Fuori Dai Limiti [{limitMinQ1:.3f}, {limitMaxQ1:.3f}]")
         return False
 
     # CC Verifica 4: Limiti Di Escursione Angolare Della Spalla (Giunto 2)
@@ -387,7 +387,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     minQ2 = limitMinQ2 - tolerance
     maxQ2 = limitMaxQ2 + tolerance
     if not (minQ2 <= q2Front <= maxQ2 or minQ2 <= q2Back <= maxQ2):
-        rospy.logwarn(f" [kinematicsUtils] Target Non Raggiungibile: Angolo q2 ({q2Front:.4f} rad) Fuori Dai Limiti [{limitMinQ2:.3f}, {limitMaxQ2:.3f}]")
+        rospy.logwarn(f"[kinematicsUtils] Target Non Raggiungibile: Angolo q2 ({q2Front:.4f} rad) Fuori Dai Limiti [{limitMinQ2:.3f}, {limitMaxQ2:.3f}]")
         return False
 
     return True
@@ -419,10 +419,10 @@ def checkSingularity(q1, q2, q3):
     # DD d3 = 0 È Fisicamente Irraggiungibile Per Il Finecorsa (d3 <= -boxSize/2 = -0.05)
     if firstCond < tolerance:
         singularityStatus = "Singolarita Giunto Prismatico d3 Vicino A Zero"
-        rospy.logwarn(f" [kinematicsUtils] Attenzione: Robot Vicino A Singolarita Prismatico Con d3 = {d3:.4f}")
+        rospy.logwarn(f"[kinematicsUtils] Attenzione: Robot Vicino A Singolarita Prismatico Con d3 = {d3:.4f}")
     elif secondCond < tolerance:
         singularityStatus = "Singolarita Giunto 2 Con Raggio Vicino A Zero"
-        rospy.logwarn(f" [kinematicsUtils] Attenzione: Robot Vicino A Singolarita Di Allineamento Con Raggio = {secondCond:.4f}")
+        rospy.logwarn(f"[kinematicsUtils] Attenzione: Robot Vicino A Singolarita Di Allineamento Con Raggio = {secondCond:.4f}")
 
     return detJ, singularityStatus
 
