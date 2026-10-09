@@ -170,9 +170,12 @@ def checkSingleJointLimit(jointName, jointValue):
     minQ3 = limitMinQ3 - tolerance
     maxQ3 = limitMaxQ3 + tolerance
 
-    if jointName == "q1":
+    # CC Normalizzazione Del Nome Per Supportare Sia La Notazione Simbolica Che Quella URDF
+    valueName = str(jointName).strip().lower()
+
+    if valueName in ("q1", "giunto1"):
         if minQ1 <= jointValue <= maxQ1:
-            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q1 Il Valore Limitato Tra I Limiti Fisici Del Giunto
+            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q1 Il Valore Clippato Tra I Limiti Fisici Del Giunto
             clippedQ1 = float(np.clip(jointValue, limitMinQ1, limitMaxQ1))
             return True, clippedQ1, ""
         elif jointValue < limitMinQ1:
@@ -180,9 +183,9 @@ def checkSingleJointLimit(jointName, jointValue):
         else:
             return False, jointValue, f"Valore Giunto 1 Superiore Al Limite Massimo [{limitMaxQ1:.3f}]"
 
-    elif jointName == "q2":
+    elif valueName in ("q2", "giunto2"):
         if minQ2 <= jointValue <= maxQ2:
-            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q2 Il Valore Limitato Tra I Limiti Fisici Del Giunto
+            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q2 Il Valore Clippato Tra I Limiti Fisici Del Giunto
             clippedQ2 = float(np.clip(jointValue, limitMinQ2, limitMaxQ2))
             return True, clippedQ2, ""
         elif jointValue < limitMinQ2:
@@ -190,9 +193,9 @@ def checkSingleJointLimit(jointName, jointValue):
         else:
             return False, jointValue, f"Valore Giunto 2 Superiore Al Limite Massimo [{limitMaxQ2:.3f}]"
 
-    elif jointName == "q3":
+    elif valueName in ("q3", "giunto3"):
         if minQ3 <= jointValue <= maxQ3:
-            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q3 Il Valore Limitato Tra I Limiti Fisici Del Giunto
+            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q3 Il Valore Clippato Tra I Limiti Fisici Del Giunto
             clippedQ3 = float(np.clip(jointValue, limitMinQ3, limitMaxQ3))
             return True, clippedQ3, ""
         elif jointValue < limitMinQ3:
@@ -446,7 +449,8 @@ def checkSingularity(q1, q2, q3):
     tolerance = 1e-3
     singularityStatus = "Sicuro"
 
-    # DD d3 = 0 È Fisicamente Irraggiungibile Per Finecorsa (d3 <= -boxSize / 2 = -0.05 m)
+    # DD d3 = 0 È Fisicamente Irraggiungibile Nei Limiti Del Giunto
+    # DD d3 <= -boxSize / 2 = -0.05 m
     if firstCond < tolerance:
         singularityStatus = "Singolarità Giunto Prismatico d3 Vicino A Zero"
         print(f"{COLOR_WARN}[kinematicsUtils] Attenzione: Robot Vicino A Singolarità Prismatica Con d3 = {d3:.4f} m (Giunto q1 = {q1:.4f} rad)")

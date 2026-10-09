@@ -106,7 +106,7 @@ def computeDirectKinematics(q1, q2, q3):
     baseHeight = kinematicsUtils.baseHeight
     worldBase = kinematicsUtils.worldBase
 
-    # BB Creazione Della Matrice Di Trasformazione Omogenea Da RF0 A RF Base
+    # BB Creazione Della Matrice Di Trasformazione Omogenea Da RF0 A RF Base (Posa Di RF0 Rispetto Al Frame Base)
     TBase0 = np.array([
         [1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
@@ -114,7 +114,7 @@ def computeDirectKinematics(q1, q2, q3):
         [0.0, 0.0, 0.0, 1.0]
     ])
 
-    # BB Creazione Della Matrice Di Trasformazione Omogenea Da RF Base A RF World
+    # BB Creazione Della Matrice Di Trasformazione Omogenea Da RF Base A RF World (Posa Del Frame Base Rispetto A World)
     TWorldBase = np.array([
         [1.0, 0.0, 0.0, worldBase],
         [0.0, 1.0, 0.0, 0.0],

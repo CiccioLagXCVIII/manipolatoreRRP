@@ -160,7 +160,7 @@
                 <material name="linkColor"/>
             </visual>
             <visual>
-                <!-- DD Posizionamento Della Guida Del Prismatico All'Estremità Del Secondo Braccio (Lunghezza L2 Più Diametro Sfera) -->
+                <!-- DD Posizionamento Della Guida Del Prismatico All'Estremità Del Secondo Braccio (Lunghezza L2 Più Raggio Sfera) -->
                 <origin xyz="${jointRadius + l2 + (boxSize/2)} 0 0" rpy="0 0 0"/>
                 <geometry>
                     <box size="${boxSize} ${boxSize} ${boxSize}"/>
