@@ -11,6 +11,11 @@ import rospy
 import numpy as np
 import kinematicsUtils
 
+# AA Codici Colore ANSI Per Terminale
+COLOR_WARN      = "\033[33m"        # Giallo Normale        (Avvisi)
+COLOR_ERR       = "\033[31m"        # Rosso Normale         (Errori)
+COLOR_RESET     = "\033[0m"         # Reset Stile           (Ripristina Colore Standard)
+
 def computeInverseKinematics(xTarget, yTarget, zTarget):
     # BB Caricamento Dei Parametri Geometrici Del Robot Dal Parameter Server
     kinematicsUtils.loadRobotParameters()
@@ -41,7 +46,7 @@ def computeInverseKinematics(xTarget, yTarget, zTarget):
 
     # CC Verifica Della Condizione Di Esistenza Per Evitare Radici Di Numeri Negativi
     if squareRootArg < -tolerance:
-        rospy.logwarn("[inverseKinematics] Target Non Raggiungibile. Si Trova Fuori Dal Workspace Del Robot.")
+        print(f"{COLOR_WARN}[inverseKinematics] Target Non Raggiungibile. Si Trova Fuori Dal Workspace Del Robot{COLOR_RESET}")
         return None, None, None
 
     # DD Prendendo Il Massimo Tra 0 E squareRootArg Si Evita Che La Funzione np.sqrt() Generi Warning Per Valori Negativi (Che Possono Accadere Per Imprecisioni Di Floating-Point)
@@ -59,8 +64,6 @@ def computeInverseKinematics(xTarget, yTarget, zTarget):
     # CC (In Quanto q3P = l3 + [ boxSize / 2.0 + sqrt(squareRootArg) ] > l3) La Metto Solo Per Completezza, Ma Non Verrà Mai Selezionata
 
     # DD Scelta Della Soluzione Che Rientra Nei Limiti Del Giunto Prismatico
-    # BB Tolleranza Per Prevenire Imprecisioni Di Floating-Point Ai Confini Del Workspace (Dava Errore Quando Era Vicino Al Confine Del WS)
-    tolerance = 1e-6
 
     q3 = None
     minQ3 = kinematicsUtils.limitMinQ3 - tolerance

@@ -12,6 +12,11 @@ import numpy as np
 import tf.transformations as tft
 from sensor_msgs.msg import JointState
 
+# AA Codici Colore ANSI Per Terminale
+COLOR_WARN      = "\033[33m"        # Giallo Normale        (Avvisi)
+COLOR_ERR       = "\033[31m"        # Rosso Normale         (Errori)
+COLOR_RESET     = "\033[0m"         # Reset Stile           (Ripristina Colore Standard)
+
 # AA Definizione Dei Parametri Fisici Del Robot Come Variabili Globali
 # BB Siccome Poi Chiamo La Funzione loadRobotParameters() Per Caricare I Parametri Dal Server ROS
 # BB Verranno Sovrascritti, Ma Comunque È Necessario Dichiararli Come Variabili Globali Per Evitare Errori
@@ -30,7 +35,7 @@ l3 = 0.35                   # Lunghezza Link 3
 linkRadius = 0.035          # Raggio Link (Diametro 7cm)
 
 # BB Giunti
-jointRadius = 0.05          # Raggio Sfere Giunti Revolute (Diametro 10cm)
+jointRadius = 0.05          # Raggio Sfere Giunti Rotoidale (Diametro 10cm)
 boxSize = 0.10              # Dimensione Box Giunto Prismatico (Lato 10cm)
 
 # BB End Effector
@@ -101,7 +106,7 @@ def loadRobotParameters(forceReload=False):
             loadedFromROS = True
         except (KeyError, rospy.ROSException):
             loadedFromROS = False
-            rospy.logwarn("[kinematicsUtils] Parametri Non Trovati Nel Server ROS, Caricamento Dal File YAML Di Configurazione...")
+            print(f"{COLOR_WARN}[kinematicsUtils] Parametri Non Trovati Nel Server ROS, Caricamento Dal File YAML Di Configurazione...")
 
     # CC Se ROS Non Riesce A Raggiungere ROS O A Caricare I Parametri, Legge I Parametri Dal File YAML
     if not loadedFromROS:
@@ -147,70 +152,6 @@ def loadRobotParameters(forceReload=False):
 # Giunto 2: Da -1.571 a 0.785 (Non Serve Andare Oltre La Verticale Per Evitare Ridondanza)
 # Giunto 3: Da 0 a L3 (Per Evitare Che La Pinza Entri Nel Box)
 
-# AA Funzione Che Verifica Se I Valori Dei Giunti Superano I Limiti E Li Modifica Se Necessario
-def checkJointLimits(q1, q2, q3):
-    # BB Importazione Dei Parametri Fisici Del Robot Dal Server ROS
-    loadRobotParameters()
-
-    if q1 is None or q2 is None or q3 is None:
-        return False, None, None, None
-
-    try:
-        q1, q2, q3 = float(q1), float(q2), float(q3)
-    except (ValueError, TypeError):
-        rospy.logwarn("[kinematicsUtils] Valori dei giunti non numerici ricevuti in checkJointLimits")
-        return False, None, None, None
-
-    isValid = True
-
-    # EE Tolleranza Per Prevenire Imprecisioni Di Floating-Point Ai Confini Del Workspace (Dava Errore Quando Era Vicino Al Confine Del WS)
-    tolerance = 1e-6
-
-    # BB Controllo Del Giunto Uno Con Tolleranza
-    # CC Verifica E Limita Il Primo Giunto Rotatorio Tra Meno Pi Greco E Piu Pi Greco
-    minQ1 = limitMinQ1 - tolerance
-    maxQ1 = limitMaxQ1 + tolerance
-    if minQ1 <= q1 <= maxQ1:
-        # EE Sempre Per Il Motivo Che Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q1 Il Valore Limitato Tra I Limiti Fisici Del Giunto
-        q1 = float(np.clip(q1, limitMinQ1, limitMaxQ1))
-    elif q1 < limitMinQ1:
-        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 1 Inferiore Al Limite Minimo [{limitMinQ1:.3f}]")
-        isValid = False
-    else:
-        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 1 Superiore Al Limite Massimo [{limitMaxQ1:.3f}]")
-        isValid = False
-
-    # BB Controllo Del Giunto Due
-    # CC Verifica E Limita Il Secondo Giunto Rotatorio Tra Meno Pi Greco Mezzi E Pi Greco Quarti
-    minQ2 = limitMinQ2 - tolerance
-    maxQ2 = limitMaxQ2 + tolerance
-    if minQ2 <= q2 <= maxQ2:
-        # EE Sempre Per Il Motivo Che Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q2 Il Valore Limitato Tra I Limiti Fisici Del Giunto
-        q2 = float(np.clip(q2, limitMinQ2, limitMaxQ2))
-    elif q2 < limitMinQ2:
-        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 2 Inferiore Al Limite Minimo [{limitMinQ2:.3f}]")
-        isValid = False
-    else:
-        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 2 Superiore Al Limite Massimo [{limitMaxQ2:.3f}]")
-        isValid = False
-
-    # BB Controllo Del Giunto Tre
-    # CC Verifica Limiti Giunto Prismatico Tra 0.0 (Massima Estensione) E La Lunghezza Del Braccio l3 (Massima Retrazione)
-    # CC Tramite I Parametri Caricati Da File YAML
-    minQ3 = limitMinQ3 - tolerance
-    maxQ3 = limitMaxQ3 + tolerance
-    if minQ3 <= q3 <= maxQ3:
-        # EE Sempre Per Il Motivo Che Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q3 Il Valore Limitato Tra I Limiti Fisici Del Giunto
-        q3 = float(np.clip(q3, limitMinQ3, limitMaxQ3))
-    elif q3 < limitMinQ3:
-        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 3 Inferiore Al Limite Minimo [{limitMinQ3:.3f}]")
-        isValid = False
-    else:
-        rospy.logwarn(f"[kinematicsUtils] Valore Giunto 3 Superiore Al Limite Massimo [{limitMaxQ3:.3f}]")
-        isValid = False
-
-    return isValid, q1, q2, q3
-
 # AA Funzione Che Verifica Se I Valori Dei Giunti INSERITI Rientrano Nei Limiti
 def checkSingleJointLimit(jointName, jointValue):
     loadRobotParameters()
@@ -230,27 +171,75 @@ def checkSingleJointLimit(jointName, jointValue):
 
     if jointName == "q1":
         if minQ1 <= jointValue <= maxQ1:
-            clippedVal = float(np.clip(jointValue, limitMinQ1, limitMaxQ1))
-            return True, clippedVal, ""
+            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q1 Il Valore Limitato Tra I Limiti Fisici Del Giunto
+            clippedQ1 = float(np.clip(jointValue, limitMinQ1, limitMaxQ1))
+            return True, clippedQ1, ""
+        elif jointValue < limitMinQ1:
+            return False, jointValue, f"Valore Giunto 1 Inferiore Al Limite Minimo [{limitMinQ1:.3f}]"
         else:
-            return False, jointValue, f"Valore Fuori Dall'Intervallo [{limitMinQ1:.3f}, {limitMaxQ1:.3f}] rad"
+            return False, jointValue, f"Valore Giunto 1 Superiore Al Limite Massimo [{limitMaxQ1:.3f}]"
 
     elif jointName == "q2":
         if minQ2 <= jointValue <= maxQ2:
-            clippedVal = float(np.clip(jointValue, limitMinQ2, limitMaxQ2))
-            return True, clippedVal, ""
+            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q2 Il Valore Limitato Tra I Limiti Fisici Del Giunto
+            clippedQ2 = float(np.clip(jointValue, limitMinQ2, limitMaxQ2))
+            return True, clippedQ2, ""
+        elif jointValue < limitMinQ2:
+            return False, jointValue, f"Valore Giunto 2 Inferiore Al Limite Minimo [{limitMinQ2:.3f}]"
         else:
-            return False, jointValue, f"Valore Fuori Dall'Intervallo [{limitMinQ2:.3f}, {limitMaxQ2:.3f}] rad"
+            return False, jointValue, f"Valore Giunto 2 Superiore Al Limite Massimo [{limitMaxQ2:.3f}]"
 
     elif jointName == "q3":
         if minQ3 <= jointValue <= maxQ3:
-            clippedVal = float(np.clip(jointValue, limitMinQ3, limitMaxQ3))
-            return True, clippedVal, ""
+            # EE Per Valori Vicino Al Bordo Del WS Da Errore, Assegno A q3 Il Valore Limitato Tra I Limiti Fisici Del Giunto
+            clippedQ3 = float(np.clip(jointValue, limitMinQ3, limitMaxQ3))
+            return True, clippedQ3, ""
+        elif jointValue < limitMinQ3:
+            return False, jointValue, f"Valore Giunto 3 Inferiore Al Limite Minimo [{limitMinQ3:.3f}]"
         else:
-            return False, jointValue, f"Valore Fuori Dall'Intervallo [{limitMinQ3:.3f}, {limitMaxQ3:.3f}] m"
+            return False, jointValue, f"Valore Giunto 3 Superiore Al Limite Massimo [{limitMaxQ3:.3f}]"
 
     else:
         return False, jointValue, f"Giunto '{jointName}' Non Riconosciuto."
+
+# AA Funzione Che Verifica Se I Valori Dei Giunti Superano I Limiti
+def checkJointLimits(q1, q2, q3):
+    # BB Importazione Dei Parametri Fisici Del Robot Dal Server ROS
+    loadRobotParameters()
+
+    if q1 is None or q2 is None or q3 is None:
+        return False, None, None, None
+
+    try:
+        q1, q2, q3 = float(q1), float(q2), float(q3)
+    except (ValueError, TypeError):
+        print(f"{COLOR_ERR}[kinematicsUtils] Ricevuti Valori Dei Giunti Non Numerici In checkJointLimits{COLOR_RESET}")
+        return False, None, None, None
+
+    # BB Controllo Del Giunto Uno Con Tolleranza Utilizzando checkSingleJointLimit
+    # CC Verifica E Limita Il Primo Giunto Rotatorio Tra Meno Pi Greco E Piu Pi Greco
+    validQ1, q1, errQ1 = checkSingleJointLimit("q1", q1)
+    if not validQ1:
+        print(f"{COLOR_ERR}[kinematicsUtils] {errQ1}")
+
+    # BB Controllo Del Giunto Due Con Tolleranza Utilizzando checkSingleJointLimit
+    # CC Verifica E Limita Il Secondo Giunto Rotatorio Tra Meno Pi Greco Mezzi E Pi Greco Quarti
+    validQ2, q2, errQ2 = checkSingleJointLimit("q2", q2)
+    if not validQ2:
+        print(f"{COLOR_ERR}[kinematicsUtils] {errQ2}")
+
+    # BB Controllo Del Giunto Tre Con Tolleranza Utilizzando checkSingleJointLimit
+    # CC Verifica Limiti Giunto Prismatico Tra 0.0 (Massima Estensione) E La Lunghezza Del Braccio l3 (Massima Retrazione)
+    # CC Tramite I Parametri Caricati Da File YAML
+    validQ3, q3, errQ3 = checkSingleJointLimit("q3", q3)
+    if not validQ3:
+        print(f"{COLOR_ERR}[kinematicsUtils] {errQ3}")
+
+    # BB Se Tutti E Tre I Valori Dei Giunti Sono Validi L'AND Restituisce True,
+    # BB Altrimenti Anche Se Uno Solo Non È ValidO, L'AND Restituisce False
+    isValid = validQ1 and validQ2 and validQ3
+
+    return isValid, q1, q2, q3
 
 # AA Funzione Che Genera Il Messaggio ROS Con I Nomi E Le Posizioni Validati In Formato JointState
 def createJointStateMsg(q1, q2, q3):
@@ -332,10 +321,10 @@ def checkWorkspace(xTarget, yTarget, zTarget):
 
     # CC Verifica 1: Distanza Sferica Dal Centro Del Giunto 2 Con Margine Di Tolleranza
     if rD < (rDMin - tolerance):
-        rospy.logwarn(f"[kinematicsUtils] Target Troppo Vicino Al Giunto 2 Del Robot: Distanza {rD:.4f} < {rDMin:.4f}")
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Troppo Vicino Al Giunto 2 Del Robot: Distanza {rD:.4f} < {rDMin:.4f}")
         return False
     elif rD > (rDMax + tolerance):
-        rospy.logwarn(f"[kinematicsUtils] Target Fuori Dal Raggio Massimo: Distanza {rD:.4f} > {rDMax:.4f}")
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Fuori Dal Raggio Massimo: Distanza {rD:.4f} > {rDMax:.4f}")
         return False
 
     # CC Verifica 2: Raggio Minimo Nel Piano XY Con Tolleranza
@@ -344,7 +333,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     d3Retracted = limitMaxQ3 - (l3 + (boxSize / 2.0))
     minRadiusXY = np.abs(d3Retracted)
     if rXY < (minRadiusXY - tolerance):
-        rospy.logwarn(f"[kinematicsUtils] Target Troppo Vicino Al Link Verticale: Raggio XY {rXY:.4f} < {minRadiusXY:.4f}")
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Troppo Vicino Al Link Verticale: Raggio XY {rXY:.4f} < {minRadiusXY:.4f}")
         return False
 
     # CC Verifica 3: Limiti Di Escursione Angolare Della Base (Giunto 1)
@@ -352,15 +341,15 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     minQ1 = limitMinQ1 - tolerance
     maxQ1 = limitMaxQ1 + tolerance
     if not (minQ1 <= q1Target <= maxQ1):
-        rospy.logwarn(f"[kinematicsUtils] Target Non Raggiungibile: Angolo q1 ({q1Target:.4f} rad) Fuori Dai Limiti [{limitMinQ1:.3f}, {limitMaxQ1:.3f}]")
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Non Raggiungibile: Angolo q1 ({q1Target:.4f} rad) Fuori Dai Limiti [{limitMinQ1:.3f}, {limitMaxQ1:.3f}]")
         return False
 
     # CC Verifica 4: Limiti Di Escursione Angolare Della Spalla (Giunto 2)
+    # DD Il Valore squareRootArg È Positivo Per Costruzione Poiché rD >= rDMin Con rDMin = sqrt(a2^2 + d3MinDist^2) Ovvero Circa 0.5523
+    # DD Sapendo Che a2 = 0.5500 Si Ha Che rDMin > a2, E Poiché rD >= rDMin, Si Ha Che rD > a2, Quindi rD^2 - a2^2 > 0 Di Conseguenza,
+    # DD squareRootArg È Sempre Positivo Per Qualsiasi Target Che Rientra Nel Workspace Del Robot
     squareRootArg = rD**2 - a2**2
-    if squareRootArg < -tolerance:
-        return False
 
-    # DD Calcolo Argomento Della Radice Quadrata Per Il Calcolo Di q2
     # EE Prendendo Il Massimo Tra 0 E squareRootArg Si Evita Che La Funzione np.sqrt() Generi Warning Per Valori Negativi (Che Possono Accadere Per Imprecisioni Di Floating-Point)
     squareRootArg = max(0.0, squareRootArg)
 
@@ -387,11 +376,29 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     minQ2 = limitMinQ2 - tolerance
     maxQ2 = limitMaxQ2 + tolerance
     if not (minQ2 <= q2Front <= maxQ2 or minQ2 <= q2Back <= maxQ2):
-        rospy.logwarn(f"[kinematicsUtils] Target Non Raggiungibile: Angolo q2 ({q2Front:.4f} rad) Fuori Dai Limiti [{limitMinQ2:.3f}, {limitMaxQ2:.3f}]")
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Non Raggiungibile: Angolo q2 ({q2Front:.4f} rad) Fuori Dai Limiti [{limitMinQ2:.3f}, {limitMaxQ2:.3f}]")
         return False
 
     return True
 
+# AA Funzione Che Verifica Le Singolarità Cinematiche Tramite Il Determinante Jacobiano
+# BB La Matrice Jacobiana J Relaziona Le Velocità Dei Giunti Con Le Velocità Cartesiane:
+# BB [-r sin(q1),  [-a2 sin(q2) + d3 cos(q2)] cos(q1), cos(q1)sin(q2)  ],
+# BB [r cos(q1),   (-a2 sin(q2) + d3 cos(q2)) sin(q1), sin(q2) sin(q1) ],
+# BB [0,           -r, 0                               cos(q2)         ],
+# BB Le Prime Due Righe Della Matrice Dipendono Da q1. Tuttavia, Per Identificare Le
+# BB Singolarità Cinematiche, È Necessario Calcolare Il Determinante Della Matrice Jacobiana.
+# BB La Matrice Jacobiana Può Essere Espressa Come J(q1, q2, q3) = Rz(q1) * J(q2, q3),
+# BB Dove Rz(q1) È La Matrice Di Rotazione Attorno All'Asse z. Poiché Una Matrice Di
+# BB Rotazione Ha Determinante Unitario E Il Determinante Di Un Prodotto Di Matrici
+# BB È Uguale Al Prodotto Dei Loro Determinanti, Si Ottiene:
+# BB det(J(q1, q2, q3)) = det(Rz(q1)) * det(J(q2, q3))
+# BB                    = 1 * det(J(q2, q3))
+# BB                    = det(J(q2, q3)).
+# BB Di Conseguenza, Il Determinante Della Matrice Jacobiana Non Dipende Da q1 E Può
+# BB Essere Calcolato Considerando Soltanto Le Variabili q2 E q3.
+# CC Per Una Derivazione Approfondita E Motivata, Vedere Il File
+# CC "6) cinematicaInversaProgetto.tex".
 
 def checkSingularity(q1, q2, q3):
     # BB Caricamento Dei Parametri Geometrici Del Robot Dal Parameter Server
@@ -401,28 +408,27 @@ def checkSingularity(q1, q2, q3):
     a2 = jointRadius + l2 + (boxSize / 2.0)
     d3 = q3 - (l3 + (boxSize / 2.0))
 
-    # BB Calcolo Determinante Della Matrice Jacobiana
-    # CC Equazione Determinante Calcolata Nel File "5) cinematicaInversaRRP.pdf"
+    # BB Calcolo Del Determinante Della Matrice Jacobiana
+    # BB Calcolata Nel File "6) cinematicaInversaProgetto.tex" (Punti Di Singolarità)
     detJ = -d3 * (d3 * np.sin(q2) + a2 * np.cos(q2))
 
-    # CC Analisi Delle Singolarita Geometriche
-    # DD Condizione 1: d_3 = 0
+    # CC Analisi Delle Condizioni Di Singolarità Geometrica
+    # DD Condizione 1: d3 = 0 (Giunto Prismatico Sull'Asse Del Giunto 2)
     firstCond = np.abs(d3)
-    # DD Condizione 2: d_3 \sin(q_2) + a_2 \cos(q_2) = 0
+    # DD Condizione 2: d3 * sin(q2) + a2 * cos(q2) = 0 (Raggio Nel Piano Orizzontale Nullo)
     secondCond = np.abs(d3 * np.sin(q2) + a2 * np.cos(q2))
 
-    # BB Logic Per Identificare Vicinanza A Configurazioni Singolari
-    # CC Soglia Di Tolleranza Definizione Di Condizione Singolare
+    # BB Valutazione Dello Stato Di Singolarità Con Tolleranza Numerica
     tolerance = 1e-3
     singularityStatus = "Sicuro"
 
-    # DD d3 = 0 È Fisicamente Irraggiungibile Per Il Finecorsa (d3 <= -boxSize/2 = -0.05)
+    # DD d3 = 0 È Fisicamente Irraggiungibile Per Finecorsa (d3 <= -boxSize / 2 = -0.05 m)
     if firstCond < tolerance:
-        singularityStatus = "Singolarita Giunto Prismatico d3 Vicino A Zero"
-        rospy.logwarn(f"[kinematicsUtils] Attenzione: Robot Vicino A Singolarita Prismatico Con d3 = {d3:.4f}")
+        singularityStatus = "Singolarità Giunto Prismatico d3 Vicino A Zero"
+        print(f"{COLOR_WARN}[kinematicsUtils] Attenzione: Robot Vicino A Singolarità Prismatica Con d3 = {d3:.4f} m (Giunto q1 = {q1:.4f} rad)")
     elif secondCond < tolerance:
-        singularityStatus = "Singolarita Giunto 2 Con Raggio Vicino A Zero"
-        rospy.logwarn(f"[kinematicsUtils] Attenzione: Robot Vicino A Singolarita Di Allineamento Con Raggio = {secondCond:.4f}")
+        singularityStatus = "Singolarità Giunto 2 Con Raggio Vicino A Zero"
+        print(f"{COLOR_WARN}[kinematicsUtils] Attenzione: Robot Vicino A Singolarità Di Spalla Con Raggio = {secondCond:.4f} m (Giunto q1 = {q1:.4f} rad)")
 
     return detJ, singularityStatus
 

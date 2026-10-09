@@ -13,7 +13,7 @@ linkRadius: 0.035          # Raggio Link (Diametro 7cm)
 # BB Giunti
 # CC Pi Greco Non E Piu Necessario Definire La Proprieta Perche Gia Presente Di Default In Xacro
 # pi: 3.14159265359
-jointRadius: 0.05          # Raggio Sfere Giunti Revolute (Diametro 10cm)
+jointRadius: 0.05          # Raggio Sfere Giunti Rotoidale (Diametro 10cm)
 boxSize: 0.10              # Dimensione Box Giunto Prismatico (Lato 10cm)
 
 # BB End Effector

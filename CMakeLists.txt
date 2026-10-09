@@ -8,6 +8,7 @@ project(manipolatoreRRP)
 
 ## AA Ricerca Pacchetti e Macro Catkin
 ## BB Individua Le Macro E Le Librerie Catkin Specificate Nel Blocco COMPONENTS
+## Non Usando C++ Bastano I Pacchetti Base
 find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
@@ -97,10 +98,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: Librerie Create In Questo Progetto Che Servono Anche Ai Progetti Dipendenti
 ## CATKIN_DEPENDS: Pacchetti Catkin Di Cui Anche I Progetti Dipendenti Hanno Bisogno
 ## DEPENDS: Dipendenze Di Sistema Di Questo Progetto Di Cui Anche I Progetti Dipendenti Hanno Bisogno
-# Esportazione Delle Dipendenze Catkin Del Pacchetto
-catkin_package(
-  CATKIN_DEPENDS rospy sensor_msgs tf tf2_ros
-)
+## Esportazione Delle Dipendenze Catkin Del Pacchetto
+## Dato Che Il Pacchetto Non Produce Librerie C++ Da Linkare Ad Altri Progetti A Tempo Di Compilazione, Non Serve Dichiarare CATKIN_DEPENDS
+catkin_package()
 
 ## AA Compilazione ed Header Files
 ## BB Definisce Le Directory Degli include, I Target Di Compilazione C++, Eseguibili E Librerie

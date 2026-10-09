@@ -30,7 +30,7 @@
     <!-- BB Giunti -->
     <!-- CC Non E Piu Necessario Definire La Proprieta Perche Gia Presente Di Default In Xacro -->
     <xacro:property name="jointRadius" value="${robotParams['jointRadius']}" />
-    <!-- Raggio Sfere Giunti Revolute (Diametro 10cm) -->
+    <!-- Raggio Sfere Giunti Rotoidale (Diametro 10cm) -->
     <xacro:property name="boxSize" value="${robotParams['boxSize']}" />
     <!-- Dimensione Box Giunto Prismatico (Lato 10cm) -->
 

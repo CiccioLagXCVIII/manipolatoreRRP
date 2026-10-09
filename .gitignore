@@ -6,11 +6,12 @@ __pycache__/
 
 # Cartella E File Esclusi Dal Repository
 scriptAusiliari/
-analize.md
+analizeProject.md
 appunti.md
 contesto.md
 daFare.md
-testManipolatore.py
+findBug.md
+jacobianFull.py
 
 # File Generati Da ROS
 frames.gv

@@ -13,6 +13,7 @@ import kinematicsUtils
 # AA Codici Colore ANSI Per Uniformare Lo Stile Con jointController
 COLOR_TITOLO    = "\033[1;36m"      # Ciano Grassetto
 COLOR_RISULTATO = "\033[1;32m"      # Verde Grassetto
+COLOR_VALORE    = "\033[1;37m"      # Bianco Grassetto
 COLOR_RESET     = "\033[0m"         # Reset Stile Standard
 
 # AA Impostazioni Stampa Di NumPy
@@ -32,7 +33,7 @@ listener = tf2_ros.TransformListener(tf_buffer)
 
 # AA Frequenza Di Aggiornamento
 # BB L'Argomento Indica Il Numero Di Aggiornamenti Da Eseguire In Un Secondo
-rate = rospy.Rate(1) # 1 Hz
+rate = rospy.Rate(1) # Frequenza 1 Hz
 
 # AA Ciclo Principale Del Nodo ROS
 try:
@@ -52,23 +53,26 @@ try:
 
             print(f"{COLOR_TITOLO}[tfPrinter] Trasformazione Da '{SOURCE_FRAME}' A '{TARGET_FRAME}':{COLOR_RESET}")
 
-            print(f"{COLOR_TITOLO}[tfPrinter] Timestamp:{COLOR_RESET} {dataTF.header.stamp.to_sec():.4f}")
+            print(f"{COLOR_TITOLO}[tfPrinter] Timestamp:{COLOR_RESET} {COLOR_VALORE}{dataTF.header.stamp.to_sec():.4f}{COLOR_RESET}")
 
-            print(f"{COLOR_RISULTATO}[tfPrinter] Posizione End Effector (Traslazione X, Y, Z):{COLOR_RESET} [ {translation.x:.4f}, {translation.y:.4f}, {translation.z:.4f} ]")
+            print(f"{COLOR_RISULTATO}[tfPrinter] Posizione End Effector (Traslazione X, Y, Z):{COLOR_RESET} {COLOR_VALORE} [ {translation.x:.4f}, {translation.y:.4f}, {translation.z:.4f} ]{COLOR_RESET}")
 
-            print(f"{COLOR_RISULTATO}[tfPrinter] [tfPrinter] Quaternione (Orientamento X, Y, Z, W):{COLOR_RESET} [ {rotation.x:.4f}, {rotation.y:.4f}, {rotation.z:.4f}, {rotation.w:.4f} ]")
+            print(f"{COLOR_RISULTATO}[tfPrinter] Quaternione (Orientamento X, Y, Z, W):{COLOR_RESET} {COLOR_VALORE} [ {rotation.x:.4f}, {rotation.y:.4f}, {rotation.z:.4f}, {rotation.w:.4f} ]{COLOR_RESET}")
 
             # BB Calcolo Della Matrice Di Trasformazione Omogenea
             transformationMatrix = kinematicsUtils.getTransformationMatrix(translation, rotation)
 
             # BB Stampa Della Matrice Di Trasformazione Omogenea
             print(f"\n{COLOR_RISULTATO}[tfPrinter] Matrice Trasformazione Omogenea {TARGET_FRAME} - {SOURCE_FRAME}:{COLOR_RESET}")
-            print(np.round(transformationMatrix, 3))
+            print(F"{COLOR_VALORE}{np.round(transformationMatrix, 3)}{COLOR_RESET}")
 
         except tf2_ros.TransformException:
-            rospy.logwarn_throttle(5.0, "[tfPrinter] In attesa Che La Trasformazione Sia Disponibile...")
+            # BB Avviso Quando La Trasformazione Non È Ancora Disponibile
+            # CC rospy.logwarn_throttle(2.5, ...) Limita La Frequenza Di Stampa Dell'Avviso A Una Volta Ogni 2.5 Secondi
+            rospy.logwarn_throttle(2.5, "[tfPrinter] In attesa Che La Trasformazione Sia Disponibile...")
 
         rate.sleep()
 
-except rospy.ROSInterruptException:
+# BB Gestione Chiusura Pulita Senza Traceback Su Interruzione Utente O Chiusura Di ROS
+except (rospy.ROSInterruptException, KeyboardInterrupt):
     pass

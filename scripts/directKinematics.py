@@ -20,21 +20,21 @@ def calculateTransformationMatrix(theta, d, a, alpha):
     #     [0.0, 0.0, 1.0, 0.0],
     #     [0.0, 0.0, 0.0, 1.0]
     # ])
-    # BB $T_z(d_i)$: Traslazione Lungo $Z_{i-1}$ Di Distanza $d_i$ (*Variabile Di Giunto Se Prismatico, Costante Se Revolute*), ovvero finché $Z_{i-1}$ e $Z_i$ sono complanari.
+    # BB $T_z(d_i)$: Traslazione Lungo $Z_{i-1}$ Di Distanza $d_i$ (Variabile Di Giunto Se Prismatico, Costante Se Rotoidale), Ovvero Finché $Z_{i-1}$ E $Z_i$ Sono Complanari.
     # Tz_d = np.array([
     #     [1.0, 0.0, 0.0, 0.0],
     #     [0.0, 1.0, 0.0, 0.0],
     #     [0.0, 0.0, 1.0, d],
     #     [0.0, 0.0, 0.0, 1.0]
     # ])
-    # BB $T_x(a_i)$: Traslazione Lungo $X_i$ Di Distanza $a_i$ (*Costante*), ovvero finché le origini dei due frame coincidono.
+    # BB $T_x(a_i)$: Traslazione Lungo $X_i$ Di Distanza $a_i$ (Costante), Ovvero Finché Le Origini Dei Due Frame Coincidono.
     # Tx_a = np.array([
     #     [1.0, 0.0, 0.0, a],
     #     [0.0, 1.0, 0.0, 0.0],
     #     [0.0, 0.0, 1.0, 0.0],
     #     [0.0, 0.0, 0.0, 1.0]
     # ])
-    # BB $R_x(\alpha_i)$: Rotazione Attorno A $X_i$ Di Angolo $\alpha_i$ finche $Z_{i-1}$ si allinea a $Z_i$.
+    # BB $R_x(\alpha_i)$: Rotazione Attorno A $X_i$ Di Angolo $\alpha_i$ Finché $Z_{i-1}$ Si Allinea A $Z_i$.
     cosAlpha = np.cos(alpha)
     sinAlpha = np.sin(alpha)
     # Rx_alpha = np.array([
@@ -94,8 +94,8 @@ def computeTransformMatrix(q1, q2, q3):
 
     return T03
 
+# AA Funzione Che Calcola La Matrice Di Trasformazione Omogenea T06 E La Posizione Dell'End Effector
 def computeDirectKinematics(q1, q2, q3):
-
     # BB Calcolo Della Cinematica Diretta Dal Frame Zero Al Frame Tre
     # CC La Funzione All'Interno Del Modulo Restituisce La Matrice Quattro Per Quattro T03
     T03 = computeTransformMatrix(q1, q2, q3)
@@ -130,7 +130,6 @@ def computeDirectKinematics(q1, q2, q3):
     positionWorld = TWorldEE[:3, 3]
 
     return TWorldEE, positionWorld
-
 
 # AA Blocco Di Test Per Verificare La Funzionalità Della Cinematica Diretta
 if __name__ == "__main__":
