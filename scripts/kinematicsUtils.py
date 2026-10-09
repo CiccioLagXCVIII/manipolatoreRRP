@@ -151,7 +151,7 @@ def loadRobotParameters(forceReload=False):
 # BB Limiti
 # Giunto 1: Da -3.142 a 3.142 (360 gradi)
 # Giunto 2: Da -1.571 a 0.785 (Non Serve Andare Oltre La Verticale Per Evitare Ridondanza)
-# Giunto 3: Da 0 a L3 (Per Evitare Che La Pinza Entri Nel Box)
+# Giunto 3: Da 0.0 (Massima Estensione Verso Il Basso) a L3 (Massima Retrazione Verso L'Alto Per Evitare Che La Pinza Entri Nel Box)
 
 # AA Funzione Che Verifica Se I Valori Dei Giunti INSERITI Rientrano Nei Limiti
 def checkSingleJointLimit(jointName, jointValue):
@@ -230,7 +230,7 @@ def checkJointLimits(q1, q2, q3):
         print(f"{COLOR_ERR}[kinematicsUtils] {errQ2}")
 
     # BB Controllo Del Giunto Tre Con Tolleranza Utilizzando checkSingleJointLimit
-    # CC Verifica Limiti Giunto Prismatico Tra 0.0 (Massima Estensione) E La Lunghezza Del Braccio l3 (Massima Retrazione)
+    # CC Verifica Limiti Giunto Prismatico Tra 0.0 (Massima Estensione Verso Il Basso) E La Lunghezza Del Braccio l3 (Massima Retrazione Verso L'Alto)
     # CC Tramite I Parametri Caricati Da File YAML
     validQ3, q3, errQ3 = checkSingleJointLimit("q3", q3)
     if not validQ3:
@@ -297,12 +297,12 @@ def checkWorkspace(xTarget, yTarget, zTarget):
 
     # CC Definizioni Valori Della Tabella Di Denavit Hartenberg
     d1 = 2*jointRadius + l1 + jointRadius               # Distanza Verticale Dal Frame 0 Al Frame 1
-    a2 = jointRadius + l2 + (boxSize / 2.0)             # Distanza Verticale Dal Frame 1 Al Frame 2 (Lunghezza Link Orizzontale)
+    a2 = jointRadius + l2 + (boxSize / 2.0)             # Distanza Verticale Dal Frame 1 Al Frame 2
     joint2Center = baseHeight + d1                      # Coordinata Z Del Centro Del Giunto 2 Rispetto Alla Base Del Robot
 
     # CC Calcolo Dei Raggi Minimo E Massimo Del Workspace Del Robot Tramite I Limiti Del Giunto 3
-    d3MaxDist = limitMinQ3 - (l3 + (boxSize / 2.0))     # Massima Estensione Verso Il Basso
-    d3MinDist = limitMaxQ3 - (l3 + (boxSize / 2.0))     # Massima Estensione Verso L'Alto
+    d3MaxDist = limitMinQ3 - (l3 + (boxSize / 2.0))     # Massima Estensione Verso Il Basso (Distanza Massima d3 = -0.40 m)
+    d3MinDist = limitMaxQ3 - (l3 + (boxSize / 2.0))     # Massima Retrazione Verso L'Alto   (Distanza Minima d3 = -0.05 m)
     rDMax = np.sqrt(a2**2 + d3MaxDist**2)               # Raggio Sfera Esterna
     rDMin = np.sqrt(a2**2 + d3MinDist**2)               # Raggio Sfera Interna
 
@@ -384,7 +384,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
 
     if np.abs(denom) < 1e-6:
         # EE Target Sull'Asse Verticale: Singolarità Di Spalla
-        rospy.logwarn("[inverseKinematics] Target Sull'Asse Verticale: q1 Indeterminato, Impostato a 0.0 rad")
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Sull'Asse Verticale: q1 Indeterminato, Impostato a 0.0 rad{COLOR_RESET}")
         q1Target = 0.0
     else:
         if denom >= 0.0:
@@ -406,7 +406,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
 # BB La Matrice Jacobiana J Relaziona Le Velocità Dei Giunti Con Le Velocità Cartesiane:
 # BB Ponendo:
 # BB A = d3 sin(q2) + a2 cos(q2)
-# BB B = -d3 cos(q2) - a2 sin(q2)
+# BB B = d3 cos(q2) - a2 sin(q2)
 # BB [-A sin(q1),  B cos(q1), sin(q2)cos(q1)  ],
 # BB [ A cos(q1),  B sin(q1), sin(q2) sin(q1) ],
 # BB [0,           -A,        cos(q2)         ]

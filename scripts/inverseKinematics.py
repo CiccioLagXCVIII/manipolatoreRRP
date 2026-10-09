@@ -61,7 +61,8 @@ def computeInverseKinematics(xTarget, yTarget, zTarget):
 
     # CC Nel Caso Di Questo Manipolatore Il Link 3 E L'End Effector Si Estendono Entrambi Verso Il Basso, Il Valore d3 È Sempre Negativo,
     # CC E Come Limite Massimo Ha l3 La Soluzione q3P Non Rientra Nei Limiti Del Giunto Prismatico
-    # CC (In Quanto q3P = l3 + [ boxSize / 2.0 + sqrt(squareRootArg) ] > l3) La Metto Solo Per Completezza, Ma Non Verrà Mai Selezionata
+    # CC In Quanto q3P = l3 + [ (boxSize / 2.0) + sqrt(squareRootArg) ] > l3
+    # CC Quindi La Metto Solo Per Completezza, Ma Non Verrà Mai Selezionata
 
     # DD Scelta Della Soluzione Che Rientra Nei Limiti Del Giunto Prismatico
 
