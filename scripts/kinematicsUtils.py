@@ -46,10 +46,11 @@ eeFingerLength = 0.05       # Lunghezza Dita Pinza 5cm
 eeFingerThickness = 0.01    # Spessore Singolo Dito Pinza 1cm
 
 # BB Limiti Giunti
-limitMinQ1 = -np.pi
-limitMaxQ1 = np.pi
-limitMinQ2 = -np.pi / 2.0
-limitMaxQ2 = np.pi / 4.0
+# CC Siccome Nel File YAML Sono Definiti Numericamente (Senza NumPy), Anche Queste Variabili Globali Devono Essere Definite Allo Stesso Modo (Anche Avendo NumPy) Per Evitare Differenze Tra I Valori Nel File YAML E Quelli Iniziali Prima Di Eseguire loadRobotParameters
+limitMinQ1 = -3.14159265359
+limitMaxQ1 = 3.14159265359
+limitMinQ2 = -1.57079632679
+limitMaxQ2 = 0.78539816339
 limitMinQ3 = 0.0
 limitMaxQ3 = 0.35
 
@@ -336,15 +337,7 @@ def checkWorkspace(xTarget, yTarget, zTarget):
         print(f"{COLOR_WARN}[kinematicsUtils] Target Troppo Vicino Al Link Verticale: Raggio XY {rXY:.4f} < {minRadiusXY:.4f}")
         return False
 
-    # CC Verifica 3: Limiti Di Escursione Angolare Della Base (Giunto 1)
-    q1Target = np.arctan2(yRel, xRel)
-    minQ1 = limitMinQ1 - tolerance
-    maxQ1 = limitMaxQ1 + tolerance
-    if not (minQ1 <= q1Target <= maxQ1):
-        print(f"{COLOR_WARN}[kinematicsUtils] Target Non Raggiungibile: Angolo q1 ({q1Target:.4f} rad) Fuori Dai Limiti [{limitMinQ1:.3f}, {limitMaxQ1:.3f}]")
-        return False
-
-    # CC Verifica 4: Limiti Di Escursione Angolare Della Spalla (Giunto 2)
+    # CC Verifica 3: Limiti Di Escursione Angolare Della Spalla (Giunto 2)
     # DD Il Valore squareRootArg È Positivo Per Costruzione Poiché rD >= rDMin Con rDMin = sqrt(a2^2 + d3MinDist^2) Ovvero Circa 0.5523
     # DD Sapendo Che a2 = 0.5500 Si Ha Che rDMin > a2, E Poiché rD >= rDMin, Si Ha Che rD > a2, Quindi rD^2 - a2^2 > 0 Di Conseguenza,
     # DD squareRootArg È Sempre Positivo Per Qualsiasi Target Che Rientra Nel Workspace Del Robot
@@ -375,17 +368,48 @@ def checkWorkspace(xTarget, yTarget, zTarget):
     # EE Controllo Che Almeno Una Delle Due Soluzioni Rientri Nei Limiti Del Giunto 2 Con Tolleranza (Dava Errore Quando Era Vicino Al Confine Del WS)
     minQ2 = limitMinQ2 - tolerance
     maxQ2 = limitMaxQ2 + tolerance
-    if not (minQ2 <= q2Front <= maxQ2 or minQ2 <= q2Back <= maxQ2):
+
+    q2Selected = None
+    if minQ2 <= q2Front <= maxQ2:
+        q2Selected = q2Front
+    elif minQ2 <= q2Back <= maxQ2:
+        q2Selected = q2Back
+    else:
         print(f"{COLOR_WARN}[kinematicsUtils] Target Non Raggiungibile: Angolo q2 ({q2Front:.4f} rad) Fuori Dai Limiti [{limitMinQ2:.3f}, {limitMaxQ2:.3f}]")
+        return False
+
+    # CC Verifica 4: Limiti Di Escursione Angolare Della Base (Giunto 1)
+    # DD Calcolo Del Segno Del Denominatore Con L'Arcotangente A Quattro Quadranti Come In inverseKinematics.py (Riga 117)
+    denom = d3 * np.sin(q2Selected) + a2 * np.cos(q2Selected)
+
+    if np.abs(denom) < 1e-6:
+        # EE Target Sull'Asse Verticale: Singolarità Di Spalla
+        rospy.logwarn("[inverseKinematics] Target Sull'Asse Verticale: q1 Indeterminato, Impostato a 0.0 rad")
+        q1Target = 0.0
+    else:
+        if denom >= 0.0:
+            signDenom = 1.0
+        else:
+            signDenom = -1.0
+
+        q1Target = np.arctan2(yRel * signDenom, xRel * signDenom)
+
+    minQ1 = limitMinQ1 - tolerance
+    maxQ1 = limitMaxQ1 + tolerance
+    if not (minQ1 <= q1Target <= maxQ1):
+        print(f"{COLOR_WARN}[kinematicsUtils] Target Non Raggiungibile: Angolo q1 ({q1Target:.4f} rad) Fuori Dai Limiti [{limitMinQ1:.3f}, {limitMaxQ1:.3f}]")
         return False
 
     return True
 
 # AA Funzione Che Verifica Le Singolarità Cinematiche Tramite Il Determinante Jacobiano
 # BB La Matrice Jacobiana J Relaziona Le Velocità Dei Giunti Con Le Velocità Cartesiane:
-# BB [-r sin(q1),  [-a2 sin(q2) + d3 cos(q2)] cos(q1), cos(q1)sin(q2)  ],
-# BB [r cos(q1),   (-a2 sin(q2) + d3 cos(q2)) sin(q1), sin(q2) sin(q1) ],
-# BB [0,           -r, 0                               cos(q2)         ],
+# BB Ponendo:
+# BB A = d3 sin(q2) + a2 cos(q2)
+# BB B = -d3 cos(q2) - a2 sin(q2)
+# BB [-A sin(q1),  B cos(q1), sin(q2)cos(q1)  ],
+# BB [ A cos(q1),  B sin(q1), sin(q2) sin(q1) ],
+# BB [0,           -A,        cos(q2)         ]
 # BB Le Prime Due Righe Della Matrice Dipendono Da q1. Tuttavia, Per Identificare Le
 # BB Singolarità Cinematiche, È Necessario Calcolare Il Determinante Della Matrice Jacobiana.
 # BB La Matrice Jacobiana Può Essere Espressa Come J(q1, q2, q3) = Rz(q1) * J(q2, q3),

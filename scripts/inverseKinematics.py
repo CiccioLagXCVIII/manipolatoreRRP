@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# AA Spiegazione Approfondita Nel File "5) Cinematica Inversa RRP"
+# AA Spiegazione Approfondita Nel File "6) cinematicaInversaProgetto.tex"
 
 # AA Importazioni Necessarie
 import os
@@ -115,7 +115,7 @@ def computeInverseKinematics(xTarget, yTarget, zTarget):
         return None, None, None
 
     # AA Calcolo Della Variabile Di Giunto Rotatorio q1
-    # CC Si Calocola Tramite Arcotangente A Quattro Quadranti
+    # CC Si Calcola Tramite Arcotangente A Quattro Quadranti
     denom = d3 * np.sin(q2) + a2 * np.cos(q2)
 
     # DD Dividere Per Un Valore Molto Piccolo (Vicino A Zero) Può Portare A Risultati Numerici Molto Grandi E Instabili

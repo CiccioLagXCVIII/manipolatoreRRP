@@ -94,7 +94,7 @@ def computeTransformMatrix(q1, q2, q3):
 
     return T03
 
-# AA Funzione Che Calcola La Matrice Di Trasformazione Omogenea T06 E La Posizione Dell'End Effector
+# AA Funzione Che Calcola La Matrice Di Trasformazione Omogenea T03 E La Posizione Dell'End Effector
 def computeDirectKinematics(q1, q2, q3):
     # BB Calcolo Della Cinematica Diretta Dal Frame Zero Al Frame Tre
     # CC La Funzione All'Interno Del Modulo Restituisce La Matrice Quattro Per Quattro T03
