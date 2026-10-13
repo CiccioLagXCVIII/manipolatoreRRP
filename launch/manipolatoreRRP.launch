@@ -1,0 +1,44 @@
+<launch>
+
+    <!-- AA Configurazione Modello URDF Del Robot -->
+
+    <!-- BB Caricamento Dei Parametri Dal File YAML Nel Server ROS All'Avvio Del Sistema -->
+    <rosparam command="load" file="$(find manipolatoreRRP)/config/robotParameters.yaml" />
+
+    <!-- BB Definizione File XACRO (Valore Predefinito: Posizione File Nella Cartella URDF) -->
+    <arg name="model" default="$(find manipolatoreRRP)/urdf/manipolatoreRRP.urdf.xacro"/>
+
+    <!-- BB Generazione Descrizione Robot Convertendo Modello XACRO In URDF E Caricamento Nel Parametro Globale -->
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+    <!-- AA Gestione Nodi Per Pubblicazione Dello Stato Dei Giunti -->
+
+    <!-- BB Definizione Argomento Per L'Abilitazione Dell' Interfaccia Grafica -->
+    <arg name="gui" default="True" />
+
+    <!-- BB Avvio Publisher Con Interfaccia Grafica Solo Se L'Argomento È Vero -->
+    <!-- CC Se gui:=False Lanciando Anche joint_state_publisher, Ci Sarebbero Più Publisher Sullo Stesso Topic -->
+    <!-- CC E In Rviz Ci Sarebbe Flickering -->
+    <node name="jointStatePublisherGui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(arg gui)"/>
+
+    <node name="robotStatePublisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <!-- CC Serve Per Ignorare I Timestamp Delle Trasformazioni TF Perchè In Docker/WSL2 Il Clock Fa Salti -->
+        <!-- CC E Compaiono I WARN -->
+        <param name="ignore_timestamp" value="true" />
+    </node>
+
+    <!-- AA Avvio RViz Con File Di Configurazione Salvato -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find manipolatoreRRP)/rviz/manipolatoreRRP.rviz" required="true">
+        <!-- BB Disabilita Pop-up Di Avviso EOL Di ROS 1 -->
+        <env name="DISABLE_ROS1_EOL_WARNINGS" value="1"/>
+    </node>
+
+    <!-- AA Gestione Script -->
+
+    <!-- BB Script Per Il Movimento Del Manipolatore Eseguito Direttamente A Schermo Se GUI È Falsa -->
+    <node name="jointController" pkg="manipolatoreRRP" type="jointController.py" output="screen" unless="$(arg gui)" required="true"/>
+
+    <!-- BB Script Che Stampa Le Matrici Di Trasformazione Solo Se La GUI È Abilitata -->
+    <node name="tfPrinter" pkg="manipolatoreRRP" type="tfPrinter.py" output="screen" if="$(arg gui)"/>
+
+</launch>
